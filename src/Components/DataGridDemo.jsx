@@ -2,6 +2,8 @@ import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import { useEffect, useState } from "react";
+// import { token } from "./InputData"; 
+
 
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
@@ -26,7 +28,7 @@ const columns = [
   }
 ];
 
-export default function DataGridDemo() {
+export default function DataGridDemo({token, refreshTrigger}) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState({
@@ -34,8 +36,12 @@ export default function DataGridDemo() {
     ids: new Set(),
   });
 
-  useEffect(() => {
-    fetch("http://localhost:3000/customers")
+  console.log(token);
+  
+  // Function to fetch data
+  const fetchData = () => {
+    setLoading(true);
+    fetch("http://localhost:8000/repos")
       .then((res) => res.json())
       .then((data) => {
         setRows(data);
@@ -45,7 +51,12 @@ export default function DataGridDemo() {
         console.error("Error fetching data:", err);
         setLoading(false);
       });
-  });
+  };
+
+  // Fetch data on component mount and whenever refreshTrigger changes
+  useEffect(() => {
+    fetchData();
+  }, [refreshTrigger]);
 
   const handleDelete = async () => {
     if (deleteId.ids.size === 0) return;
@@ -54,13 +65,15 @@ export default function DataGridDemo() {
     console.log("Deleting IDs:", idsArray);
 
     try {
-      const res = await fetch('http://localhost:3000/customers', {
+      const res = await fetch('http://localhost:8000/repos', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: idsArray }),
       });
       const data = await res.json();
       console.log(data);
+      // Refresh data after deletion
+      fetchData();
     } catch (error) {
       console.error("Delete failed:", error);
     }
@@ -75,6 +88,7 @@ export default function DataGridDemo() {
       <DataGrid
         rows={rows}
         columns={columns}
+        getRowId={(row) => row._id}
         initialState={{
           pagination: {
             paginationModel: {

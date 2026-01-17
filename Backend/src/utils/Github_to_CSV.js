@@ -2,16 +2,19 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export default async function listAllPrivateRepos() {
+export default async function listAllPrivateRepos(token) {
   const base = "https://api.github.com/user/repos?visibility=all&per_page=100";
-  const headers = { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` };
+  // Use the passed token or fallback to environment variable
+  const authToken = token || process.env.GITHUB_TOKEN;
+  const headers = { Authorization: `Bearer ${authToken}` };
   let url = base;
 
   const all = [];
 
   while (url) {
     const res = await fetch(url, { headers });
-    const page = await res.json();
+    const page = await res.json() || [];
+    console.log(page)
 
     all.push(
       ...page.map((repo) => [
