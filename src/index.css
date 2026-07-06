@@ -1,1 +1,14 @@
-@import "tailwindcss";
+/* Tailwind utilities are kept available, but its preflight reset is omitted
+   so it does not conflict with MUI's CssBaseline (which owns the global reset). */
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}

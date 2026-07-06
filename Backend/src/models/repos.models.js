@@ -20,6 +20,10 @@ const repoSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    githubUpdatedAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

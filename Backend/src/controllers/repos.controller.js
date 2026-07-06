@@ -32,22 +32,36 @@ const setRepoData = async (req, res) => {
       });
     }
 
-    // Transform data for MongoDB insertion
+    // Transform data for MongoDB insertion.
+    // GitHub repo tuple: [name, clone_url, updated_at, owner.login, language]
     const repoDocuments = allRepos.map((repo) => ({
       name: repo[0],
       url: repo[1],
+      githubUpdatedAt: repo[2] || null,
       owner: repo[3],
       lang: repo[4],
     }));
 
-    // Insert into MongoDB using insertMany (bulk insert)
-    const result = await Repo.insertMany(repoDocuments, { ordered: false });
+    // Bulk insert. Duplicate keys (repos already imported) are expected on a
+    // re-import, so with { ordered: false } we count the docs that did insert
+    // instead of failing the whole request.
+    let insertedCount;
+    try {
+      const result = await Repo.insertMany(repoDocuments, { ordered: false });
+      insertedCount = result.length;
+    } catch (err) {
+      if (Array.isArray(err?.insertedDocs)) {
+        insertedCount = err.insertedDocs.length;
+      } else {
+        throw err;
+      }
+    }
 
-    console.log("Number of records inserted: " + result.length);
+    console.log("Number of records inserted: " + insertedCount);
     res.json({
       success: true,
-      message: "Token received and repositories inserted successfully",
-      recordsInserted: result.length,
+      message: `Imported ${insertedCount} new repositories`,
+      recordsInserted: insertedCount,
     });
   } catch (error) {
     console.error("Error processing token:", error);

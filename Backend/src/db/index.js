@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Remove trailing slash from MONGO_URI if present
-const baseUri = process.env.MONGO_URI.replace(/\/$/, '');
+const baseUri = process.env.MONGO_URI?.replace(/\/$/, '') || '';
 const mongoUrl = `${baseUri}/${DB_NAME}`;
 
 const conn = mongoose.connect(mongoUrl)
